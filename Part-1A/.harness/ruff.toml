@@ -3,8 +3,8 @@ line-length = 100
 
 [lint]
 select = ["E", "F", "ANN", "B", "T20"]
-ignore = ["ANN101", "ANN102"]
+ignore = [] 
 
 [lint.per-file-ignores]
 "tests/*" = ["ANN", "T20"]
-"src/cli.py" = ["T201"]
+"src/cli.py" = ["T20"]   

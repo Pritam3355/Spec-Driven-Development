@@ -4,7 +4,7 @@ import ast
 import importlib
 import pathlib
 import sys
-import traceback
+# import traceback
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]   # Part-1A/
 SRC = ROOT / "src"
@@ -80,7 +80,6 @@ def check_streaks() -> list[str]:
 
 
 # ---------------------------------------------------------------- 3. AST scan
-
 def scan_forbidden() -> list[tuple[str, int, str]]:
     findings: list[tuple[str, int, str]] = []
     if not SRC.exists():
@@ -94,16 +93,108 @@ def scan_forbidden() -> list[tuple[str, int, str]]:
         except SyntaxError as e:
             findings.append((rel, e.lineno or 0, f"SyntaxError: {e.msg}"))
             continue
+
+        # cli.py is the designated output layer (constitution rule 3, clarify Q9)
+        is_cli = path.name == "cli.py"
+
         for node in ast.walk(tree):
             if isinstance(node, ast.Assert):
                 findings.append((rel, node.lineno,
                                  "`assert` in src/  (constitution rule 7)"))
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                if node.func.id == "print" and is_cli:
+                    continue                                    # allowed in cli.py
                 if node.func.id in FORBIDDEN_CALLS:
                     findings.append((rel, node.lineno,
                                      f"`{node.func.id}()` in src/  (constitution rules 3 / 6)"))
     return findings
 
+def check_service_smoke() -> list[str]:
+    """End-to-end: add_habit -> log x2 -> streak=2 -> save -> reload -> streak=2.
+
+    Exercises the full service layer (spec FR-1, FR-2, FR-3, FR-5) in one
+    pass. Catches constructor-signature mismatches, missing auto-load on
+    __init__, save/load roundtrip bugs, and streak logic errors — things
+    py_compile cannot see.
+    """
+    errors: list[str] = []
+    try:
+        from src.service import HabitTracker
+    except Exception as e:
+        return [f"cannot import src.service.HabitTracker: {e}"]
+
+    import datetime
+    import tempfile
+
+    data_path = pathlib.Path(tempfile.mkdtemp(prefix="habit-smoke-")) / "h.json"
+
+    # construct
+    try:
+        t = HabitTracker(data_path=data_path)
+    except TypeError as e:
+        return [
+            f"HabitTracker(data_path=...) rejected: {e}. "
+            f"If the constructor uses a different kwarg or positional arg, "
+            f"adapt this check (see plan D5)."
+        ]
+    except Exception as e:
+        return [f"HabitTracker() raised {type(e).__name__}: {e}"]
+
+    # add
+    try:
+        h = t.add_habit("run", "daily")
+    except Exception as e:
+        return [f"add_habit raised {type(e).__name__}: {e}"]
+    if not getattr(h, "id", None):
+        errors.append("add_habit returned a habit without .id")
+
+    # log today + yesterday
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+    yesterday = today - datetime.timedelta(days=1)
+    try:
+        t.log(h.id, today.isoformat())
+        t.log(h.id, yesterday.isoformat())
+    except Exception as e:
+        errors.append(f"log raised {type(e).__name__}: {e}")
+        return errors
+
+    # streak in-memory
+    try:
+        got = t.current_streak(h.id)
+    except Exception as e:
+        errors.append(f"current_streak raised {type(e).__name__}: {e}")
+        return errors
+    if got != 2:
+        errors.append(f"streak in-memory: expected 2, got {got!r}")
+
+    # save
+    try:
+        t.save()
+    except Exception as e:
+        errors.append(f"save raised {type(e).__name__}: {e}")
+        return errors
+    if not data_path.exists():
+        errors.append(f"save did not create {data_path}")
+        return errors
+
+    # reload — requires auto-load on __init__ from data_path
+    try:
+        t2 = HabitTracker(data_path=data_path)
+    except Exception as e:
+        errors.append(f"HabitTracker() on existing file raised {type(e).__name__}: {e}")
+        return errors
+    try:
+        got2 = t2.current_streak(h.id)
+    except Exception as e:
+        errors.append(f"current_streak after reload raised {type(e).__name__}: {e}")
+        return errors
+    if got2 != 2:
+        errors.append(
+            f"streak after save/reload: expected 2, got {got2!r}. "
+            f"Check that HabitTracker auto-loads from data_path on __init__ "
+            f"(spec FR-5.3, FR-5.4; plan D5)."
+        )
+    return errors
 
 # ---------------------------------------------------------------- main
 
@@ -129,7 +220,17 @@ def main() -> int:
     else:
         print("  OK  — daily_streak behaves per spec FR-3.2")
 
-    print("\n== 3. Forbidden constructs in src/ ==")
+    print("\n== 3. Service smoke (add/log/save/reload) ==")
+    svc_errors = check_service_smoke()
+    if svc_errors:
+        print("  FAIL")
+        for e in svc_errors:
+            print(f"    - {e}")
+    else:
+        print("  OK  — HabitTracker end-to-end per spec FR-1/2/3/5")
+
+    
+    print("\n== 4. Forbidden constructs in src/ ==")
     findings = scan_forbidden()
     if findings:
         print(f"  FAIL  ({len(findings)} finding(s))")
@@ -138,7 +239,7 @@ def main() -> int:
     else:
         print("  OK  — no print/eval/exec/assert in src/")
 
-    overall = not (imp_errors or streak_errors or findings)
+    overall = not (imp_errors or streak_errors or svc_errors or findings)
     print("\nOVERALL:", "PASS" if overall else "FAIL")
     return 0 if overall else 1
 

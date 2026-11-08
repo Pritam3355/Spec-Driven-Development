@@ -6,7 +6,7 @@ Applies to every file under `src/` and `tests/`. Violations are gate failures.
 ## Quality bars
 1. All public functions/classes have type hints (Ruff ANN).
 2. Test coverage of `src/` >= **50%** (`pytest --cov-fail-under=50`).
-3. No `print()` in `src/` (Ruff T201), except `src/cli.py` (presentation layer).
+3. No `print()` in `src/` except `src/cli.py`, which is the designated output layer (Ruff T201, per-file-ignore in `.harness/ruff.toml`).
 4. No mutable default arguments (Ruff B006).
 5. Public functions have a one-line docstring.
 
