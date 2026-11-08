@@ -24,3 +24,6 @@
 **Q8:** Default data file location?
 **A8:** `./data/habits.json` relative to CWD; `--data <path>` overrides.
 Directory created if missing; file created on first `save`.
+
+**Q9:** Where is `print()` allowed?
+**A9:** Only in `src/cli.py`. All other `src/` modules must not print (Ruff T201).

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-11-08T05:50:39Z",
+  "overall": "FAIL",
+  "gates": [
+    {
+      "gate": "lint",
+      "command": "ruff check --config .harness/ruff.toml src tests",
+      "exit_code": 1,
+      "status": "FAIL",
+      "stdout": "F401 [*] `traceback` imported but unused\n --> tests\\test_harness_smoke_test.py:7:8\n  |\n5 | import pathlib\n6 | import sys\n7 | import traceback\n  |        ^^^^^^^^^\n8 |\n9 | ROOT = pathlib.Path(__file__).resolve().parents[1]   # Part-1A/\n  |\nhelp: Remove unused import: `traceback`\n  |\n6 | import sys\n  - import traceback\n7 |\n  |\n\nE501 Line too long (105 > 100)\n  --> tests\\test_harness_smoke_test.py:60:101\n   |\n59 |     cases = [\n60 |         # name                       logs                                          today         expected\n   |                                                                                                     ^^^^^\n61 |         (\"3-day run ending today\",  [\"2026-01-01\", \"2026-01-02\", \"2026-01-03\"], \"2026-01-03\", 3),\n62 |         (\"gap (today missing)\",     [\"2026-01-01\"],                           \"2026-01-03\", 0),\n   |\n\nFound 2 errors.\n[*] 1 fixable with `--fix`.\n",
+      "stderr": "warning: The following rules have been removed and ignoring them has no effect:\n    - ANN101\n    - ANN102\n\n"
+    },
+    {
+      "gate": "security",
+      "command": "bandit -c .harness/bandit.yaml -r src -q",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "gate": "tests",
+      "command": "pytest -q tests --cov=src --cov-report=term-missing --cov-fail-under=50",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": "...........                                                              [100%]\n=============================== tests coverage ================================\n______________ coverage: platform win32, python 3.12.10-final-0 _______________\n\nName              Stmts   Miss  Cover   Missing\n-----------------------------------------------\nsrc\\__init__.py       0      0   100%\nsrc\\cli.py           50     50     0%   4-85\nsrc\\errors.py         9      0   100%\nsrc\\models.py        18      0   100%\nsrc\\service.py       63     10    84%   55, 59-60, 62, 92, 109-110, 118, 129-132\nsrc\\store.py         49     35    29%   15-28, 38-52, 57-69, 76, 79-97\nsrc\\streaks.py       24     11    54%   25-39\n-----------------------------------------------\nTOTAL               213    106    50%\nRequired test coverage of 50% reached. Total coverage: 50.23%\n11 passed in 0.09s\n",
+      "stderr": ""
+    }
+  ]
+}
