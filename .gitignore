@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.venv
+htmlcov/
+.env
+.env.*
+data/
+# run artifacts are written to evidence/harness-runs/ and evidence/eval-results/
+# and ARE committed as evidence

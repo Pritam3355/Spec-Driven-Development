@@ -1,0 +1,8 @@
+You are grading a habit-extraction system.
+
+User input: {input}
+System output (JSON): {output}
+
+Rate 0.0 to 1.0 how faithful the output's habit_name is to the user's intended
+action/object, and whether the intent field is correct. Respond ONLY with JSON:
+{"score": <float>, "reason": "<one sentence>"}

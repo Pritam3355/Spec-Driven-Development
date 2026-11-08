@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["intent", "habit_name", "quantity", "unit", "date",
+               "needs_clarification", "clarification_question"],
+  "additionalProperties": false,
+  "properties": {
+    "intent": {"enum": ["log_entry", "query_streak", "clarify", "unknown"]},
+    "habit_name": {"type": ["string", "null"], "minLength": 1, "maxLength": 100},
+    "quantity": {"type": ["number", "null"], "minimum": 0},
+    "unit": {"type": ["string", "null"], "maxLength": 20},
+    "date": {"type": ["string", "null"], "format": "date"},
+    "needs_clarification": {"type": "boolean"},
+    "clarification_question": {"type": ["string", "null"], "maxLength": 200}
+  }
+}
