@@ -5,13 +5,22 @@ Habit Tracker CLI (Part 1A, deterministic) + Natural-Language Habit Logger
 
 ## Prereqs
 ```
-pip install pytest pytest-cov ruff bandit jsonschema requests
+pip install -r requiremnents.txt
 ```
 
 ## Part 1A — Habit Tracker
-```
+```bash
 cd Part-1A
 python .harness/run_harness.py
+python -m pytest tests/ -v 
+
+## Testing
+python -m src.cli --data /tmp/demo.json add "stretch" daily 
+python -m src.cli --data /tmp/demo.json add "cardio" daily
+python -m src.cli --data /tmp/demo.json add "ice bath" weekly
+python -m src.cli --data /tmp/demo.json list
+python -m src.cli --data /tmp/demo.json add "cardio" daily
+
 ```
 
 ## Part 1B — NL Habit Logger 

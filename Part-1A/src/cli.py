@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_parser = commands.add_parser("add", help="Add a habit.")
     add_parser.add_argument("name")
-    add_parser.add_argument("frequency", choices=("daily", "weekly"))
+    add_parser.add_argument("frequency")
 
     log_parser = commands.add_parser("log", help="Log a habit completion.")
     log_parser.add_argument("habit_id")
