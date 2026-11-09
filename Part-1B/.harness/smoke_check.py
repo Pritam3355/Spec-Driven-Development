@@ -132,15 +132,15 @@ def check_config() -> list[str]:
     try:
         p = pathlib.Path(tempfile.mkdtemp()) / ".env"
         p.write_text(
-            'GEMINI_API_KEY="abc 123"\nGEMINI_MODEL=gemini-2.0-flash\nBROKEN LINE\n',
+            'GROQ_API_KEY="abc 123"\nGROQ_MODEL=openai/gpt-oss-20b\nBROKEN LINE\n',
             encoding="utf-8",
         )
         env: dict[str, str] = {}
         config.load_dotenv(p, env)
-        if env.get("GEMINI_API_KEY") != "abc 123":
-            errors.append(f"load_dotenv: key={env.get('GEMINI_API_KEY')!r} (want 'abc 123')")
-        if env.get("GEMINI_MODEL") != "gemini-2.0-flash":
-            errors.append(f"load_dotenv: model={env.get('GEMINI_MODEL')!r}")
+        if env.get("GROQ_API_KEY") != "abc 123":
+            errors.append(f"load_dotenv: key={env.get('GROQ_API_KEY')!r} (want 'abc 123')")
+        if env.get("GROQ_MODEL") != "openai/gpt-oss-20b":
+            errors.append(f"load_dotenv: model={env.get('GROQ_MODEL')!r}")
         if "BROKEN" in env:
             errors.append("load_dotenv: malformed line not ignored")
     except Exception as e:
@@ -149,11 +149,11 @@ def check_config() -> list[str]:
     # b) env wins over .env
     try:
         p = pathlib.Path(tempfile.mkdtemp()) / ".env"
-        p.write_text("GEMINI_API_KEY=from-file\n", encoding="utf-8")
-        env = {"GEMINI_API_KEY": "from-export"}
+        p.write_text("GROQ_API_KEY=from-file\n", encoding="utf-8")
+        env = {"GROQ_API_KEY": "from-export"}
         config.load_dotenv(p, env)
-        if env["GEMINI_API_KEY"] != "from-export":
-            errors.append(f"load_dotenv overwrote env var (got {env['GEMINI_API_KEY']!r})")
+        if env["GROQ_API_KEY"] != "from-export":
+            errors.append(f"load_dotenv overwrote env var (got {env['GROQ_API_KEY']!r})")
     except Exception as e:
         errors.append(f"load_dotenv override-check raised {type(e).__name__}: {e}")
 
@@ -164,8 +164,8 @@ def check_config() -> list[str]:
             config._find_dotenv = lambda *a, **k: None
         try:
             try:
-                config.get_gemini_api_key({})
-                errors.append("get_gemini_api_key({}) did NOT raise on missing key")
+                config.get_groq_api_key({})
+                errors.append("get_groq_api_key({}) did NOT raise on missing key")
             except RuntimeError:
                 pass
             except Exception as e:
@@ -177,7 +177,6 @@ def check_config() -> list[str]:
         errors.append(f"missing-key check raised {type(e).__name__}: {e}")
 
     return errors
-
 
 # ---------------------------------------------------------------- 4. provider
 
@@ -205,14 +204,15 @@ def check_provider() -> list[str]:
     except Exception as e:
         errors.append(f"LLMProvider.generate raised {type(e).__name__}, want NotImplementedError")
 
-    # GeminiProvider: missing key → RuntimeError BEFORE any network call.
+    # GroqProvider: missing key → RuntimeError BEFORE any network call.
     import os
     try:
-        from src.provider import GeminiProvider
-    except Exception:
-        return errors  # optional Ollama-only setup; other checks stand
+        from src.provider import GroqProvider
+    except Exception as e:
+        errors.append(f"GroqProvider missing from src.provider: {e}")
+        return errors
 
-    saved = os.environ.pop("GEMINI_API_KEY", None)
+    saved = os.environ.pop("GROQ_API_KEY", None)
     try:
         from src import config as _cfg
         orig_find = getattr(_cfg, "_find_dotenv", None)
@@ -220,30 +220,29 @@ def check_provider() -> list[str]:
             _cfg._find_dotenv = lambda *a, **k: None
         try:
             try:
-                p = GeminiProvider()
+                p = GroqProvider()
             except RuntimeError:
                 p = None
             if p is not None:
                 try:
                     p.generate("x")
-                    errors.append("GeminiProvider.generate() with no key did NOT raise")
+                    errors.append("GroqProvider.generate() with no key did NOT raise")
                 except RuntimeError:
                     pass
                 except Exception as e:
                     errors.append(
-                        f"GeminiProvider no-key generate raised {type(e).__name__}, want RuntimeError"
+                        f"GroqProvider no-key generate raised {type(e).__name__}, want RuntimeError"
                     )
         finally:
             if orig_find is not None:
                 _cfg._find_dotenv = orig_find
     except Exception as e:
-        errors.append(f"GeminiProvider no-key check raised {type(e).__name__}: {e}")
+        errors.append(f"GroqProvider no-key check raised {type(e).__name__}: {e}")
     finally:
         if saved is not None:
-            os.environ["GEMINI_API_KEY"] = saved
+            os.environ["GROQ_API_KEY"] = saved
 
     return errors
-
 
 # ---------------------------------------------------------------- 5. guardrails
 
