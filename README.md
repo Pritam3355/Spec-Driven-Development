@@ -27,7 +27,7 @@ python -m src.cli log $id 2026-11-06
 python -m src.cli log $id 2026-11-07
 python -m src.cli log $id 2026-11-08
 python -m src.cli log $id 2026-11-09 # unless you put current date the streak will be 0
-python -m src.cli streak $id
+python -m src.cli streak $id 
 python -m src.cli logs $id
 ```
 
