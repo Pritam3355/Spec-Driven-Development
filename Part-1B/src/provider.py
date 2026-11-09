@@ -5,6 +5,8 @@ import time
 
 import requests
 
+from src.config import get_groq_api_key
+
 
 class LLMProvider:
     """Define the interface implemented by language model providers."""
@@ -26,36 +28,27 @@ class FakeProvider(LLMProvider):
         return self.preset
 
 
-class GeminiProvider(LLMProvider):
-    """Generate JSON responses using the Gemini REST API."""
+class GroqProvider(LLMProvider):
+    """Generate JSON responses using Groq's OpenAI-compatible REST API."""
 
     def __init__(self) -> None:
-        """Configure the Gemini model from the environment."""
-        self.model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+        """Configure the Groq model from the environment."""
+        self.model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
+        self.endpoint = "https://api.groq.com/openai/v1/chat/completions"
 
     def generate(self, prompt: str) -> str:
-        """Generate a response using Gemini's JSON output mode."""
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            raise RuntimeError(
-                "GEMINI_API_KEY environment variable is required for Gemini."
-            )
-
-        endpoint = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{self.model}:generateContent"
-        )
+        """Generate a response using Groq's JSON output mode."""
+        api_key = get_groq_api_key()
         body = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 512,
-                "responseMimeType": "application/json",
-            },
+            "model": self.model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.2,
+            "max_tokens": 1024,
+            "response_format": {"type": "json_object"},
         }
-        headers = {"x-goog-api-key": api_key}
+        headers = {"Authorization": f"Bearer {api_key}"}
         response = requests.post(
-            endpoint,
+            self.endpoint,
             json=body,
             headers=headers,
             timeout=30,
@@ -63,11 +56,11 @@ class GeminiProvider(LLMProvider):
         if response.status_code == 429:
             time.sleep(3)
             response = requests.post(
-                endpoint,
+                self.endpoint,
                 json=body,
                 headers=headers,
                 timeout=30,
             )
         response.raise_for_status()
         response_data = response.json()
-        return response_data["candidates"][0]["content"]["parts"][0]["text"]
+        return response_data["choices"][0]["message"]["content"]

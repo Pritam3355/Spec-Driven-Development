@@ -5,10 +5,10 @@ __pycache__/
 .venv
 htmlcov/
 .env
-.env.*
 data/
 init.zip
 Workflows.md
+Workflows-2.md
 Part-1A/evidence/initial-generation/src
 Part-1A/evidence/initial-generation/tests
 Part-1A/evidence/final-generation/src

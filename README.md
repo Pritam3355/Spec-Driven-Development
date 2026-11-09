@@ -34,7 +34,7 @@ python -m src.cli logs $id
 ## Part 1B — NL Habit Logger 
 ```
 cd Part-1B
-GEMINI_API_KEY="..."   # https://aistudio.google.com/apikey
+fill .env as per .env.example
 python .harness/evaluation_runner.py
 ```
 

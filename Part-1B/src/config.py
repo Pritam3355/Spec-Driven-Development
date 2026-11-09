@@ -43,20 +43,20 @@ def _find_dotenv(start: Path | None = None) -> Path | None:
     return None
 
 
-def get_gemini_api_key(
+def get_groq_api_key(
     env: MutableMapping[str, str] | None = None,
 ) -> str:
-    """Get the Gemini key from the environment or the nearest .env file."""
+    """Get the Groq key from the environment or the nearest .env file."""
     target = os.environ if env is None else env
-    api_key = target.get("GEMINI_API_KEY", "").strip()
+    api_key = target.get("GROQ_API_KEY", "").strip()
     if api_key:
         return api_key
 
     dotenv_path = _find_dotenv()
     if dotenv_path is not None:
         load_dotenv(dotenv_path, target)
-        api_key = target.get("GEMINI_API_KEY", "").strip()
+        api_key = target.get("GROQ_API_KEY", "").strip()
         if api_key:
             return api_key
 
-    raise RuntimeError("GEMINI_API_KEY is not set in the environment or .env file.")
+    raise RuntimeError("GROQ_API_KEY is not set in the environment or .env file.")

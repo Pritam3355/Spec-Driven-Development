@@ -3,7 +3,7 @@
 | ID | Task | Depends | Satisfies | Done when |
 |----|------|---------|-----------|-----------|
 | T-1 | `provider.py`: protocol + Fake | — | plan D1 | Importable, fake returns preset |
-| T-2 | `config.py`: `.env` loader; `provider.py`: GeminiProvider | T-1 | tech stack, const. 26 | Key from env or gitignored `.env` via `src/config.py` (env wins, never logged); free-tier REST |
+| T-2 | `config.py`: `.env` loader; `provider.py`: GroqProvider | T-1 | tech stack, const. 26 | Key from env or gitignored `.env` via `src/config.py` (env wins, never logged); free-tier REST |
 | T-3 | `prompts.py`: system prompt | — | plan D2 | Embeds all §1 fields |
 | T-4 | `agent.py`: parse skeleton + safe envelope | T-1 | GR-2 | Safe on empty input |
 | T-5 | `guardrails.py`: envelope + PII + destructive | — | GR-1,GR-3,BP-3 | Unit-testable |
