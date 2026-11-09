@@ -1,4 +1,4 @@
-"""Plumbing tests — no network, uses FakeProvider."""
+"""Plumbing tests — no network, uses FakeProvider (and a mocked Groq call)."""
 from src.agent import parse
 from src.provider import FakeProvider
 
@@ -29,3 +29,34 @@ def test_pii_guardrail():
     out = parse("my ssn is 123-45-6789", provider=FakeProvider(_PII_ECHO))
     assert "123-45-6789" not in str(out)
     assert out["clarification_question"]  # INV-1 still holds after masking
+
+
+def test_groq_provider_request_shape(monkeypatch):
+    """GroqProvider builds the OpenAI-compatible call and parses the reply."""
+    import src.provider as provider_module
+
+    class _FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+
+    captured = {}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        captured["url"] = url
+        captured["body"] = json
+        captured["headers"] = headers
+        return _FakeResponse()
+
+    monkeypatch.setattr(provider_module.requests, "post", fake_post)
+    monkeypatch.setattr(provider_module, "get_groq_api_key", lambda: "test-key")
+    out = provider_module.GroqProvider().generate("hi")
+    assert out == '{"ok": true}'
+    assert captured["url"] == "https://api.groq.com/openai/v1/chat/completions"
+    assert captured["headers"]["Authorization"].startswith("Bearer ")
+    assert captured["body"]["messages"][0]["content"] == "hi"
+    assert captured["body"]["response_format"] == {"type": "json_object"}

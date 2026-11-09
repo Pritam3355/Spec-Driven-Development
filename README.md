@@ -32,10 +32,14 @@ python -m src.cli logs $id
 ```
 
 ## Part 1B — NL Habit Logger 
-```
+```bash
 cd Part-1B
-GEMINI_API_KEY="..."   # https://aistudio.google.com/apikey
-python .harness/evaluation_runner.py
+GROQ_API_KEY="..."   # update .env
+python -m pytest tests/ -v
+
+# Testing 
+python .harness/evaluation_runner.py # Test on evals/dataset.json examples
+python .harness/model_smoke.py # Test with single example
 ```
 
 ## Evidence

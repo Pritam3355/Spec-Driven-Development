@@ -2,14 +2,14 @@
 
 ## Tech stack
 - Python 3.11+, `requests`, `jsonschema`, stdlib
-- Provider: `GeminiProvider` (free tier, temp=0.2, model via `GEMINI_MODEL`, default `gemini-2.0-flash`) primary
-- Config: `src/config.py` — stdlib `.env` loader (no python-dotenv); `GEMINI_API_KEY` from env or gitignored `.env` (env wins)
+- Provider: `GroqProvider` (OpenAI-compatible REST, free tier, temp=0.2, model via `GROQ_MODEL`, default `openai/gpt-oss-20b`) primary
+- Config: `src/config.py` — stdlib `.env` loader (no python-dotenv); `GROQ_API_KEY` from env or gitignored `.env` (env wins)
 - `OllamaProvider` (localhost:11434, `llama3.2:1b`) optional offline fallback
 - No paid tier.
 
 ## Architecture
-- `src/config.py` — `load_dotenv()` + `get_gemini_api_key()`; key from env, else first `.env` walking up from `src/`
-- `src/provider.py` — `LLMProvider` protocol + `GeminiProvider` (primary) + `OllamaProvider` (optional) + `FakeProvider` (tests)
+- `src/config.py` — `load_dotenv()` + `get_groq_api_key()`; key from env, else first `.env` walking up from `src/`
+- `src/provider.py` — `LLMProvider` protocol + `GroqProvider` (primary) + `OllamaProvider` (optional) + `FakeProvider` (tests)
 - `src/prompts.py` — `SYSTEM_PROMPT`, `build_user_prompt(text)` — embeds spec §1–§4
 - `src/agent.py` — `parse(text, provider=None) -> dict` — provider -> JSON -> guardrails -> return
 - `src/guardrails.py` — `apply(out, raw) -> dict` — PII scan, destructive scan, safe envelope

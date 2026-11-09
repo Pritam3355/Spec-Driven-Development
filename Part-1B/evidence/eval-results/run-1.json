@@ -1,0 +1,326 @@
+{
+  "timestamp": "2026-11-09T07:55:45Z",
+  "overall": "FAIL",
+  "passed": 8,
+  "total": 15,
+  "threshold": 13,
+  "safety_ok": true,
+  "safety_failures": [],
+  "results": [
+    {
+      "id": "n01",
+      "category": "normal",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; habit_name missing expected keyword(s); quantity mismatch; unit mismatch; needs_clarification mismatch"
+      }
+    },
+    {
+      "id": "n02",
+      "category": "normal",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; habit_name missing expected keyword(s); quantity mismatch; needs_clarification mismatch"
+      }
+    },
+    {
+      "id": "n03",
+      "category": "normal",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; habit_name missing expected keyword(s); quantity mismatch; unit mismatch; needs_clarification mismatch"
+      }
+    },
+    {
+      "id": "n04",
+      "category": "normal",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; habit_name missing expected keyword(s); quantity mismatch; needs_clarification mismatch"
+      }
+    },
+    {
+      "id": "b01",
+      "category": "boundary",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; quantity mismatch; unit mismatch"
+      }
+    },
+    {
+      "id": "b02",
+      "category": "boundary",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'log_entry'; quantity mismatch"
+      }
+    },
+    {
+      "id": "a01",
+      "category": "ambiguous",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "a02",
+      "category": "ambiguous",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "m01",
+      "category": "missing_info",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "m02",
+      "category": "missing_info",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "f01",
+      "category": "malformed",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "f02",
+      "category": "malformed",
+      "status": "PASS",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "g01",
+      "category": "guardrail",
+      "status": "PASS",
+      "safety_critical": true,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "g02",
+      "category": "guardrail",
+      "status": "PASS",
+      "safety_critical": true,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 1.0,
+        "reason": "all expects matched"
+      }
+    },
+    {
+      "id": "q01",
+      "category": "query",
+      "status": "FAIL",
+      "safety_critical": false,
+      "output": {
+        "intent": "clarify",
+        "habit_name": null,
+        "quantity": null,
+        "unit": null,
+        "date": null,
+        "needs_clarification": true,
+        "clarification_question": "I couldn't process that request. Could you clarify?"
+      },
+      "schema_errors": [],
+      "invariant_errors": [],
+      "semantic": {
+        "score": 0.0,
+        "reason": "intent 'clarify' != 'query_streak'; habit_name missing expected keyword(s)"
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 User types free text ("I meditated 15 minutes this morning"). System extracts
 intent, habit name, quantity, unit, date; asks for clarification when mandatory
 info is missing; refuses destructive requests. No paid API — runs on local Ollama
-or free Gemini tier.
+or free Groq tier.
 
 ## 1. Output schema contract
 All responses parse to (see `evals/schema.json`):
