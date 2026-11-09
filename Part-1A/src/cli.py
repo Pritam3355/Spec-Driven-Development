@@ -40,6 +40,9 @@ def build_parser() -> argparse.ArgumentParser:
     logs_parser = commands.add_parser("logs", help="List a habit's logs.")
     logs_parser.add_argument("habit_id")
 
+    delete_parser = commands.add_parser("delete", help="Delete a habit.")
+    delete_parser.add_argument("habit_id")
+
     return parser
 
 
@@ -74,6 +77,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                     indent=2,
                 )
             )
+        elif args.command == "delete":
+            tracker.delete_habit(args.habit_id)
+            tracker.save()
+            print(json.dumps({"deleted": args.habit_id}))
     except HabitError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

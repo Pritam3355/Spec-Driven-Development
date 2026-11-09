@@ -4,6 +4,7 @@
 from datetime import date as Date
 from datetime import datetime, timezone
 from pathlib import Path
+import re
 from uuid import uuid4
 
 from src import store, streaks
@@ -18,6 +19,21 @@ from src.errors import (
 )
 from src.models import Habit, HabitSummary, LogEntry
 
+_DOW_TOKENS = ("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+_DOW_WEEKDAYS = {
+    "Sun": 6,
+    "Mon": 0,
+    "Tue": 1,
+    "Wed": 2,
+    "Thu": 3,
+    "Fri": 4,
+    "Sat": 5,
+}
+_DOW_FREQUENCY_PATTERN = re.compile(
+    r"\[(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)"
+    r"(?:,(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat))*\]"
+)
+
 
 class HabitTracker:
     """Manage habits and their completion logs."""
@@ -31,8 +47,8 @@ class HabitTracker:
 
     def add_habit(self, name: str, frequency: str) -> Habit:
         """Validate and add a habit, or return its existing duplicate."""
-        if frequency not in {"daily", "weekly"}:
-            raise InvalidFrequencyError("Frequency must be 'daily' or 'weekly'.")
+        if not self._is_valid_frequency(frequency):
+            raise InvalidFrequencyError("Frequency must be daily, weekly, or a valid day list.")
         if not isinstance(name, str) or not name.strip() or len(name) > 100:
             raise InvalidNameError("Name must contain 1 to 100 characters.")
 
@@ -89,7 +105,13 @@ class HabitTracker:
 
         if habit.frequency == "daily":
             return streaks.daily_streak(dates, today)
-        return streaks.weekly_streak(dates, today)
+        if habit.frequency == "weekly":
+            return streaks.weekly_streak(dates, today)
+        scheduled_days = frozenset(
+            _DOW_WEEKDAYS[token]
+            for token in habit.frequency[1:-1].split(",")
+        )
+        return streaks.days_of_week_streak(dates, today, scheduled_days)
 
     def list_habits(self) -> list[HabitSummary]:
         """Return habit summaries sorted by name."""
@@ -116,6 +138,29 @@ class HabitTracker:
     def save(self, path: Path | None = None) -> None:
         """Persist tracker state atomically."""
         store.save(path if path is not None else self.data_path, self._habits, self._logs)
+
+    def delete_habit(self, habit_id: str) -> None:
+        """Delete a habit and all of its completion logs."""
+        self._find_habit(habit_id)
+        self._habits = [
+            habit for habit in self._habits if habit.id != habit_id
+        ]
+        self._logs = [
+            entry for entry in self._logs if entry.habit_id != habit_id
+        ]
+
+    @staticmethod
+    def _is_valid_frequency(frequency: str) -> bool:
+        """Check daily, weekly, and strictly ordered day-list frequencies."""
+        if not isinstance(frequency, str):
+            return False
+        if frequency in {"daily", "weekly"}:
+            return True
+        if not _DOW_FREQUENCY_PATTERN.fullmatch(frequency):
+            return False
+        tokens = frequency[1:-1].split(",")
+        positions = [_DOW_TOKENS.index(token) for token in tokens]
+        return positions == sorted(set(positions))
 
     def _find_habit(self, habit_id: str) -> Habit:
         """Find a habit by id or raise the domain error."""
