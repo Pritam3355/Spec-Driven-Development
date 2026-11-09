@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-11-09T05:16:50Z",
+  "overall": "FAIL",
+  "gates": [
+    {
+      "gate": "lint",
+      "command": "ruff check --config .harness/ruff.toml src tests",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "gate": "security",
+      "command": "bandit -c .harness/bandit.yaml -r src -q",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "gate": "tests",
+      "command": "pytest -q tests --cov=src --cov-report=term-missing --cov-fail-under=50",
+      "exit_code": 2,
+      "status": "FAIL",
+      "stdout": "\n=================================== ERRORS ====================================\n___________________ ERROR collecting tests/test_service.py ____________________\nImportError while importing test module 'E:\\RAG\\Spec-Driven-Development\\Part-1A\\tests\\test_service.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Program Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\test_service.py:13: in <module>\n    from src.streaks import days_of_week_streak\nE   ImportError: cannot import name 'days_of_week_streak' from 'src.streaks' (E:\\RAG\\Spec-Driven-Development\\Part-1A\\src\\streaks.py)\n=========================== short test summary info ===========================\nERROR tests/test_service.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.09s\n",
+      "stderr": ""
+    }
+  ]
+}

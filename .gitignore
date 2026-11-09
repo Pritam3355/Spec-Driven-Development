@@ -7,5 +7,11 @@ htmlcov/
 .env
 .env.*
 data/
+init.zip
+Workflows.md
+Part-1A/evidence/initial-generation/src
+Part-1A/evidence/initial-generation/tests
+Part-1A/evidence/final-generation/src
+Part-1A/evidence/final-generation/tests
 # run artifacts are written to evidence/harness-runs/ and evidence/eval-results/
 # and ARE committed as evidence

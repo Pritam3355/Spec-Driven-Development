@@ -13,7 +13,7 @@ FORBIDDEN_CALLS = {"print", "eval", "exec"}
 
 
 # ---------------------------------------------------------------- 1. imports
-
+"""every src/*.py imports cleanly"""
 def check_imports() -> list[str]:
     errors: list[str] = []
     if not SRC.exists():
@@ -47,7 +47,7 @@ def check_imports() -> list[str]:
 
 
 # ---------------------------------------------------------------- 2. spot checks
-
+"""daily_streak behaves per spec FR-3.2"""
 def check_streaks() -> list[str]:
     """Exact spot checks against spec FR-3.2."""
     errors: list[str] = []
@@ -55,7 +55,10 @@ def check_streaks() -> list[str]:
         from src.streaks import daily_streak
     except Exception as e:
         return [f"cannot import src.streaks.daily_streak: {e}"]
-
+    try:
+        from src.streaks import weekly_streak
+    except Exception as e:
+        return [f"cannot import src.streaks.daily_streak: {e}"]
     cases = [
         # name                       logs                                          today         expected
         ("3-day run ending today",  ["2026-01-01", "2026-01-02", "2026-01-03"], "2026-01-03", 3),
@@ -78,6 +81,36 @@ def check_streaks() -> list[str]:
             errors.append(f"{name}: expected {expected}, got {got!r}")
     return errors
 
+"""DoW streak check (spec FR-3.5)"""
+def check_dow_streak() -> list[str]:
+    """v1.1 spot checks for days_of_week_streak (spec FR-3.5, T-15)."""
+    errors: list[str] = []
+    try:
+        from src.streaks import days_of_week_streak
+    except Exception as e:
+        return [f"cannot import src.streaks.days_of_week_streak (v1.1 T-15): {e}"]
+
+    MWF = frozenset({0, 2, 4})  # Python weekdays: Mon=0, Wed=2, Fri=4
+    cases = [
+        # name                          logs                                          today         expected
+        ("MWF streak=5",
+         ["2026-01-05","2026-01-07","2026-01-09","2026-01-12","2026-01-14"], "2026-01-14", 5),
+        ("scheduled today unlogged => 0",
+         ["2026-01-05","2026-01-07","2026-01-09"], "2026-01-12", 0),
+        ("rest day preserves streak",
+         ["2026-01-05","2026-01-07","2026-01-09"], "2026-01-10", 3),
+        ("missed scheduled breaks even on rest day",
+         ["2026-01-05","2026-01-07"], "2026-01-10", 0),
+    ]
+    for name, logs, today, expected in cases:
+        try:
+            got = days_of_week_streak(logs, today, MWF)
+        except Exception as e:
+            errors.append(f"{name}: raised {type(e).__name__}: {e}")
+            continue
+        if got != expected:
+            errors.append(f"{name}: expected {expected}, got {got!r}")
+    return errors
 
 # ---------------------------------------------------------------- 3. AST scan
 def scan_forbidden() -> list[tuple[str, int, str]]:
@@ -109,6 +142,9 @@ def scan_forbidden() -> list[tuple[str, int, str]]:
                                      f"`{node.func.id}()` in src/  (constitution rules 3 / 6)"))
     return findings
 
+"""Service smoke (add/log/save/reload) 
+HabitTracker end-to-end per spec FR-1/2/3/5
+"""
 def check_service_smoke() -> list[str]:
     """End-to-end: add_habit -> log x2 -> streak=2 -> save -> reload -> streak=2.
 
@@ -197,6 +233,79 @@ def check_service_smoke() -> list[str]:
     return errors
 
 # ---------------------------------------------------------------- main
+""" Delete cascade check (spec FR-6)"""
+def check_delete_cascade() -> list[str]:
+    """v1.1 spot checks for delete_habit cascade (spec FR-6, T-13)."""
+    errors: list[str] = []
+    try:
+        from src.service import HabitTracker
+        from src.errors import HabitNotFoundError
+    except Exception as e:
+        return [f"import failed: {e}"]
+
+    import datetime, json, tempfile
+    data_path = pathlib.Path(tempfile.mkdtemp(prefix="habit-del-")) / "h.json"
+    try:
+        t = HabitTracker(data_path=data_path)
+        h = t.add_habit("temp", "daily")
+        today = datetime.datetime.now(datetime.timezone.utc).date()
+        t.log(h.id, (today - datetime.timedelta(days=1)).isoformat())
+        t.delete_habit(h.id)
+        t.save()
+
+        data = json.loads(data_path.read_text(encoding="utf-8"))
+        if any(x["id"] == h.id for x in data["habits"]):
+            errors.append("delete: habit still in store after save")
+        if any(x["habit_id"] == h.id for x in data["logs"]):
+            errors.append("delete: orphan logs remain after save — cascade broken")
+
+        # second delete must raise (no tombstones, clarify Q11)
+        try:
+            HabitTracker(data_path=data_path).delete_habit(h.id)
+            errors.append("delete: second delete did NOT raise HabitNotFoundError")
+        except HabitNotFoundError:
+            pass
+    except AttributeError as e:
+        errors.append(f"delete_habit missing on HabitTracker (v1.1 T-13): {e}")
+    except Exception as e:
+        errors.append(f"delete smoke raised {type(e).__name__}: {e}")
+    return errors
+
+
+# ---------------------------------------------------------------- main
+"""CLI parser check (spec FR-7.1/7.2)"""
+
+def check_cli_parser() -> list[str]:
+    """v1.1 spot checks: delete subcommand + free-form DoW frequency (FR-7)."""
+    errors: list[str] = []
+    try:
+        from src.cli import build_parser
+    except Exception as e:
+        return [f"cannot import src.cli.build_parser: {e}"]
+
+    parser = build_parser()
+
+    try:
+        args = parser.parse_args(["delete", "abc-123"])
+        if getattr(args, "command", None) != "delete":
+            errors.append(f"delete subcommand: command={args.command!r}")
+        if getattr(args, "habit_id", None) != "abc-123":
+            errors.append(f"delete subcommand: habit_id={args.habit_id!r}")
+    except SystemExit:
+        errors.append("delete subcommand not recognized (v1.1 T-16)")
+
+    try:
+        args = parser.parse_args(["add", "gym", "[Mon,Wed,Fri]"])
+        if args.frequency != "[Mon,Wed,Fri]":
+            errors.append(f"add DoW frequency: got {args.frequency!r}")
+    except SystemExit:
+        errors.append(
+            "add with DoW frequency rejected — argparse must NOT restrict "
+            "choices; validation lives in service (plan D9, FR-7.2)"
+        )
+    return errors
+
+# ---------------------------------------------------------------- main
 
 def main() -> int:
     print(f"root: {ROOT}")
@@ -229,8 +338,34 @@ def main() -> int:
     else:
         print("  OK  — HabitTracker end-to-end per spec FR-1/2/3/5")
 
-    
-    print("\n== 4. Forbidden constructs in src/ ==")
+    print("\n== 4. DoW streak spot checks (v1.1) ==")
+    dow_errors = check_dow_streak()
+    if dow_errors:
+        print("  FAIL")
+        for e in dow_errors:
+            print(f"    - {e}")
+    else:
+        print("  OK  — days_of_week_streak behaves per spec FR-3.5")
+
+    print("\n== 5. Delete cascade (v1.1) ==")
+    del_errors = check_delete_cascade()
+    if del_errors:
+        print("  FAIL")
+        for e in del_errors:
+            print(f"    - {e}")
+    else:
+        print("  OK  — delete_habit cascades and rejects double-delete")
+
+    print("\n== 6. CLI parser (v1.1) ==")
+    cli_errors = check_cli_parser()
+    if cli_errors:
+        print("  FAIL")
+        for e in cli_errors:
+            print(f"    - {e}")
+    else:
+        print("  OK  — delete subcommand and DoW frequency parse")
+
+    print("\n== 7. Forbidden constructs in src/ ==")
     findings = scan_forbidden()
     if findings:
         print(f"  FAIL  ({len(findings)} finding(s))")
@@ -239,9 +374,13 @@ def main() -> int:
     else:
         print("  OK  — no print/eval/exec/assert in src/")
 
-    overall = not (imp_errors or streak_errors or svc_errors or findings)
+    overall = not (
+        imp_errors or streak_errors or svc_errors or dow_errors
+        or del_errors or cli_errors or findings
+    )
     print("\nOVERALL:", "PASS" if overall else "FAIL")
     return 0 if overall else 1
+    
 
 
 if __name__ == "__main__":
