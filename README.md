@@ -19,12 +19,10 @@ python -m src.cli add "ice bath" weekly
 python -m src.cli add "cardio" [Mon,Wed,Fri]
 python -m src.cli add "stretch" daily
 python -m src.cli list
-python -m src.cli delete 2803721b-3fb3-45eb-aadb-e75e5feaab5f # <habit_id>
+python -m src.cli delete <habit_id>
 
 ## Log & streak (for streching)
-$id = "2399c57f-4639-463f-987a-5416a473b31f"
-python -m src.cli log $id 2026-11-06
-python -m src.cli log $id 2026-11-07
+$id = "<habit_id>"
 python -m src.cli log $id 2026-11-08
 python -m src.cli log $id 2026-11-09 # unless you put current date the streak will be 0
 python -m src.cli streak $id 
